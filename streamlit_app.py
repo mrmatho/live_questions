@@ -35,8 +35,14 @@ def submit_question(new_question):
 
 # Function to submit a student response
 def submit_response(question_id, student_name, student_response):
-    conn.execute("INSERT INTO responses (question_id, student_name, response_text) VALUES (?, ?, ?)",
-                 (question_id, student_name, student_response))
+    existing_response = conn.execute("SELECT id FROM responses WHERE question_id = ? AND student_name = ?",
+                                     (question_id, student_name)).fetchone()
+    if existing_response:
+        conn.execute("UPDATE responses SET response_text = ? WHERE id = ?",
+                     (student_response, existing_response[0]))
+    else:
+        conn.execute("INSERT INTO responses (question_id, student_name, response_text) VALUES (?, ?, ?)",
+                     (question_id, student_name, student_response))
 
 # Navigation menu
 with st.sidebar:
@@ -54,7 +60,7 @@ with st.sidebar:
             options=["Teacher", "Student"],
             icons=["person", "people"],
             menu_icon="cast",
-            default_index=0,
+            default_index=1,
         )
 
 if selected == "Teacher":
@@ -99,14 +105,31 @@ elif selected == "Student":
     if current_question:
         st.write(current_question[1])
 
-        # Student response input
-        student_response = st.text_input("Your response:")
-        if st.button("Submit Response"):
-            if student_name and student_response:
-                submit_response(current_question[0], student_name, student_response)
-                st.success("Response submitted!")
+        if student_name:
+            # Check if the student has already submitted a response
+            existing_response = conn.execute("SELECT response_text FROM responses WHERE question_id = ? AND student_name = ?",
+                                             (current_question[0], student_name)).fetchone()
+            if existing_response:
+                student_response = st.text_area("Your response:", value=existing_response[0])
+                if st.button("Edit Response"):
+                    submit_response(current_question[0], student_name, student_response)
+                    st.success("Response updated!")
             else:
-                st.error("Please enter your name and response")
+                student_response = st.text_area("Your response:")
+                if st.button("Submit Response"):
+                    if student_response:
+                        submit_response(current_question[0], student_name, student_response)
+                        st.success("Response submitted!")
+                    else:
+                        st.error("Please enter your response")
+
+        # Track responses in session state
+        if 'responses' not in st.session_state:
+            st.session_state['responses'] = {}
+        
+        # Update session state
+        if st.session_state.get('responses').get(student_name) != current_question[0]:
+            st.session_state['responses'][student_name] = current_question[0]
     else:
         st.write("No question available")
 

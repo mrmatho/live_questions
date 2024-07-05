@@ -1,8 +1,8 @@
-# 🎈 Blank app template
+# 🎈 Live Questions
 
-A simple Streamlit app template for you to modify!
+A simple live Q and A Application
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-template.streamlit.app/)
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://livequestions.streamlit.app/)
 
 ### How to run it on your own machine
 
