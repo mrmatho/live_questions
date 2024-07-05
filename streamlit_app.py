@@ -1,7 +1,6 @@
 import duckdb
 import streamlit as st
 from streamlit_option_menu import option_menu
-import time
 
 # Set up the DuckDB database
 conn = duckdb.connect('responses.db')
@@ -61,10 +60,10 @@ with st.sidebar:
     else:
         selected = option_menu(
             menu_title="Navigation",
-            options=["Teacher", "Student"],
-            icons=["person", "people"],
+            options=["Student", "Teacher"],
+            icons=["people", "person"],
             menu_icon="cast",
-            default_index=1,
+            default_index=0,
         )
 
 if selected == "Teacher":
@@ -93,6 +92,8 @@ if selected == "Teacher":
 
             # Display all responses to the current question
             st.header("All Responses")
+            if st.button("Check for Responses"):
+                st.experimental_rerun()
             responses = conn.execute("SELECT student_name, response_text FROM responses WHERE question_id = ?",
                                      (current_question[0],)).fetchall()
             for response in responses:
@@ -127,9 +128,8 @@ elif selected == "Student":
                     else:
                         st.error("Please enter your response")
         
-        # Polling for updates
-        st.experimental_rerun()
-        time.sleep(10)  # Poll every 10 seconds to check for new questions/responses
+        if st.button("Check for Next Question"):
+            st.experimental_rerun()
     else:
         st.write("No question available")
 
