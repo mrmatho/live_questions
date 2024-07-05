@@ -27,9 +27,8 @@ CREATE TABLE IF NOT EXISTS responses (
 """)
 
 # Authentication
-TEACHER_USERNAME = "teacher"
-TEACHER_PASSWORD = "password"  # Ideally, use environment variables or a secure method to store passwords
-
+TEACHER_USERNAME = st.secrets['LOGIN']
+TEACHER_PASSWORD = st.secrets['PASSWORD'] 
 # Function to submit a new question
 def submit_question(new_question):
     conn.execute("INSERT INTO questions (question_text) VALUES (?)", (new_question,))
@@ -41,26 +40,35 @@ def submit_response(question_id, student_name, student_response):
 
 # Navigation menu
 with st.sidebar:
-    selected = option_menu(
-        menu_title="Navigation",
-        options=["Teacher", "Student", "Archive"],
-        icons=["person", "people", "archive"],
-        menu_icon="cast",
-        default_index=0,
-    )
+    if st.session_state.get('logged_in', False):
+        selected = option_menu(
+            menu_title="Navigation",
+            options=["Teacher", "Archive", "Logout"],
+            icons=["person", "archive", "box-arrow-right"],
+            menu_icon="cast",
+            default_index=0,
+        )
+    else:
+        selected = option_menu(
+            menu_title="Navigation",
+            options=["Teacher", "Student"],
+            icons=["person", "people"],
+            menu_icon="cast",
+            default_index=0,
+        )
 
 if selected == "Teacher":
-    # Teacher authentication
-    st.title("Teacher Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Login"):
-        if username == TEACHER_USERNAME and password == TEACHER_PASSWORD:
-            st.session_state['logged_in'] = True
-        else:
-            st.error("Invalid username or password")
-
-    if st.session_state.get('logged_in', False):
+    if not st.session_state.get('logged_in', False):
+        # Teacher authentication
+        st.title("Teacher Login")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        if st.button("Login"):
+            if username == TEACHER_USERNAME and password == TEACHER_PASSWORD:
+                st.session_state['logged_in'] = True
+            else:
+                st.error("Invalid username or password")
+    else:
         st.title("Teacher Page")
         new_question = st.text_input("Enter a new question:")
         if st.button("Submit Question"):
@@ -102,7 +110,7 @@ elif selected == "Student":
     else:
         st.write("No question available")
 
-elif selected == "Archive":
+elif selected == "Archive" and st.session_state.get('logged_in', False):
     # Archive section for teacher to view old questions and responses
     st.title("Archive")
     questions = conn.execute("SELECT id, question_text FROM questions ORDER BY id DESC").fetchall()
@@ -112,3 +120,7 @@ elif selected == "Archive":
                                  (question[0],)).fetchall()
         for response in responses:
             st.write(f"{response[0]}: {response[1]}")
+
+elif selected == "Logout":
+    st.session_state['logged_in'] = False
+    st.experimental_rerun()
