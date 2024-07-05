@@ -64,7 +64,7 @@ with st.sidebar:
             options=["Teacher", "Student"],
             icons=["person", "people"],
             menu_icon="cast",
-            default_index=0,
+            default_index=1,
         )
 
 if selected == "Teacher":
