@@ -1,14 +1,15 @@
 import duckdb
 import streamlit as st
 from streamlit_option_menu import option_menu
+import time
 
 # Set up the DuckDB database
 conn = duckdb.connect('responses.db')
 
 # Create sequence for primary keys
 conn.execute("CREATE SEQUENCE IF NOT EXISTS seq_question START 1")
-
 conn.execute("CREATE SEQUENCE IF NOT EXISTS seq_response START 1")
+
 # Create tables for questions and responses
 conn.execute("""
 CREATE TABLE IF NOT EXISTS questions (
@@ -28,12 +29,14 @@ CREATE TABLE IF NOT EXISTS responses (
 
 # Authentication
 TEACHER_USERNAME = st.secrets['LOGIN']
-TEACHER_PASSWORD = st.secrets['PASSWORD'] 
+TEACHER_PASSWORD = st.secrets['PASSWORD']
+
 # Function to submit a new question
 def submit_question(new_question):
     conn.execute("INSERT INTO questions (question_text) VALUES (?)", (new_question,))
+    st.experimental_rerun()
 
-# Function to submit a student response
+# Function to submit or update a student response
 def submit_response(question_id, student_name, student_response):
     existing_response = conn.execute("SELECT id FROM responses WHERE question_id = ? AND student_name = ?",
                                      (question_id, student_name)).fetchone()
@@ -43,6 +46,7 @@ def submit_response(question_id, student_name, student_response):
     else:
         conn.execute("INSERT INTO responses (question_id, student_name, response_text) VALUES (?, ?, ?)",
                      (question_id, student_name, student_response))
+    st.experimental_rerun()
 
 # Navigation menu
 with st.sidebar:
@@ -60,7 +64,7 @@ with st.sidebar:
             options=["Teacher", "Student"],
             icons=["person", "people"],
             menu_icon="cast",
-            default_index=1,
+            default_index=0,
         )
 
 if selected == "Teacher":
@@ -72,6 +76,7 @@ if selected == "Teacher":
         if st.button("Login"):
             if username == TEACHER_USERNAME and password == TEACHER_PASSWORD:
                 st.session_state['logged_in'] = True
+                st.experimental_rerun()
             else:
                 st.error("Invalid username or password")
     else:
@@ -79,7 +84,6 @@ if selected == "Teacher":
         new_question = st.text_input("Enter a new question:")
         if st.button("Submit Question"):
             submit_question(new_question)
-            st.success("Question submitted!")
 
         # Display current question
         st.header("Current Question")
@@ -122,14 +126,10 @@ elif selected == "Student":
                         st.success("Response submitted!")
                     else:
                         st.error("Please enter your response")
-
-        # Track responses in session state
-        if 'responses' not in st.session_state:
-            st.session_state['responses'] = {}
         
-        # Update session state
-        if st.session_state.get('responses').get(student_name) != current_question[0]:
-            st.session_state['responses'][student_name] = current_question[0]
+        # Polling for updates
+        st.experimental_rerun()
+        time.sleep(10)  # Poll every 10 seconds to check for new questions/responses
     else:
         st.write("No question available")
 
