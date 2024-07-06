@@ -88,7 +88,8 @@ if selected == "Teacher":
         st.header("Current Question")
         current_question = conn.execute("SELECT id, question_text FROM questions ORDER BY id DESC LIMIT 1").fetchone()
         if current_question:
-            st.write(current_question[1])
+            with st.chat_message("user"):
+                st.write(current_question[1])
 
             # Display all responses to the current question
             st.header("All Responses")
@@ -97,18 +98,23 @@ if selected == "Teacher":
             responses = conn.execute("SELECT student_name, response_text FROM responses WHERE question_id = ?",
                                      (current_question[0],)).fetchall()
             for response in responses:
-                st.write(f"{response[0]}: {response[1]}")
+                with st.chat_message(response[0]):
+                    st.write(f"{response[0]}: {response[1]}")
         else:
             st.write("No question available")
 
 elif selected == "Student":
     # Student section
     st.title("Student Page")
-    student_name = st.text_input("Enter your name")
-    st.header("Current Question")
+    
     current_question = conn.execute("SELECT id, question_text FROM questions ORDER BY id DESC LIMIT 1").fetchone()
+    
     if current_question:
-        st.write(current_question[1])
+        with st.chat_message("user"):
+            st.write(current_question[1], help="This is what you")
+        st.header("Current Question")
+        student_name = st.text_input("Enter your name")
+        
 
         if student_name:
             # Check if the student has already submitted a response
@@ -142,7 +148,8 @@ elif selected == "Archive" and st.session_state.get('logged_in', False):
         responses = conn.execute("SELECT student_name, response_text FROM responses WHERE question_id = ?",
                                  (question[0],)).fetchall()
         for response in responses:
-            st.write(f"{response[0]}: {response[1]}")
+            with st.chat_message(response[0]):
+                st.write(response[1])
 
 elif selected == "Logout":
     st.session_state['logged_in'] = False
