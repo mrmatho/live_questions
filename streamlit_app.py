@@ -84,11 +84,12 @@ def display_student_page() -> None:
     current_question = conn.execute("SELECT id, question_text FROM questions ORDER BY id DESC LIMIT 1").fetchone()
 
     if current_question:
+        st.header("Current Question")
+        
+        student_name = st.text_input("Enter your name")
         with st.chat_message("user"):
             st.write(current_question[1], help="This is what you need to respond to.")
-        st.header("Current Question")
-        student_name = st.text_input("Enter your name")
-
+        
         if student_name:
             # Check if the student has already submitted a response
             existing_response = conn.execute("SELECT response_text FROM responses WHERE question_id = ? AND student_name = ?",
