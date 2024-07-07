@@ -88,7 +88,7 @@ def display_student_page() -> None:
         
         student_name = st.text_input("Enter your name")
         with st.chat_message("user"):
-            st.write(current_question[1], help="This is what you need to respond to.")
+            st.write(current_question[1])
         
         if student_name:
             # Check if the student has already submitted a response
@@ -124,7 +124,7 @@ def display_archive_page() -> None:
                                  (question[0],)).fetchall()
         for response in responses:
             with st.chat_message(response[0]):
-                st.write(response[1])
+                st.write(f"**{response[0]}**: {response[1]}")
 
 
 def display_login_page() -> None:
@@ -144,7 +144,7 @@ def display_login_page() -> None:
 with st.sidebar:
     if st.session_state.get('logged_in', False):
         selected = option_menu(
-            menu_title="Navigation",
+            menu_title="Live Questions",
             options=["Teacher", "Archive", "Logout"],
             icons=["person", "archive", "box-arrow-right"],
             menu_icon="cast",
@@ -152,7 +152,7 @@ with st.sidebar:
         )
     else:
         selected = option_menu(
-            menu_title="Navigation",
+            menu_title="Live Questions",
             options=["Student", "Teacher"],
             icons=["people", "person"],
             menu_icon="cast",
