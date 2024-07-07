@@ -92,26 +92,29 @@ def display_student_page() -> None:
         st.header("Current Question")
         
         student_name = st.text_input("Enter your name")
-        with st.chat_message("user"):
+        with st.chat_message("user", avatar="❓"):
             st.write(current_question[1])
-        
-        if student_name:
+        existing_response = ''
+        if student_name:    
             # Check if the student has already submitted a response
             existing_response = conn.execute("SELECT response_text FROM responses WHERE question_id = ? AND student_name = ?",
-                                             (current_question[0], student_name)).fetchone()
-            if existing_response:
-                student_response = st.text_area("Your response:", value=existing_response[0])
-                if st.button("Edit Response"):
-                    submit_response(current_question[0], student_name, student_response)
-                    st.success("Response updated!")
-            else:
-                student_response = st.text_area("Your response:")
-                if st.button("Submit Response"):
+                                            (current_question[0], student_name)).fetchone()
+        if existing_response:
+            student_response = st.text_area("Your response:", value=existing_response[0])
+            if st.button("Edit Response"):
+                submit_response(current_question[0], student_name, student_response)
+                st.success("Response updated!")
+        else:
+            student_response = st.text_area("Your response:")
+            if st.button("Submit Response"):
+                if student_name:
                     if student_response:
                         submit_response(current_question[0], student_name, student_response)
                         st.success("Response submitted!")
                     else:
                         st.error("Please enter your response")
+                else:
+                        st.error("Please enter your name")
 
         if st.button("Check for Next Question"):
             st.rerun()
