@@ -4,7 +4,7 @@ from streamlit_option_menu import option_menu
 from typing import Optional
 import os.path
 
-
+st.logo('images/liveq_logo.png')
 # Set up the DuckDB database if it doesn't exist. Otherwise just connect
 if os.path.isfile('responses.db'):
     # this needs to be inside the if, otherwise it will create the file and never realise the db is empty
@@ -93,7 +93,8 @@ def display_student_page() -> None:
         
         student_name = st.text_input("Enter your name")
         with st.chat_message("user", avatar="❓"):
-            st.write(current_question[1])
+            st.write("Your question is:")
+            st.subheader(current_question[1])
         existing_response = ''
         if student_name:    
             # Check if the student has already submitted a response
@@ -157,6 +158,7 @@ with st.sidebar:
             icons=["person", "archive", "box-arrow-right"],
             menu_icon="cast",
             default_index=0,
+            
         )
     else:
         selected = option_menu(
