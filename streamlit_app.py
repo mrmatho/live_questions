@@ -7,10 +7,10 @@ import os.path
 
 # Set up the DuckDB database if it doesn't exist. Otherwise just connect
 if os.path.isfile('responses.db'):
+    # this needs to be inside the if, otherwise it will create the file and never realise the db is empty
     conn = duckdb.connect('responses.db')
 else:
     conn = duckdb.connect('responses.db')
-
     # Create sequence for primary keys
     conn.execute("CREATE SEQUENCE IF NOT EXISTS seq_question START 1")
     conn.execute("CREATE SEQUENCE IF NOT EXISTS seq_response START 1")
@@ -40,7 +40,7 @@ TEACHER_PASSWORD = st.secrets['PASSWORD']
 def submit_question(new_question: str) -> None:
     """Submit a new question to the database."""
     conn.execute("INSERT INTO questions (question_text) VALUES (?)", (new_question,))
-    st.experimental_rerun()
+    st.rerun()
 
 
 def submit_response(question_id: int, student_name: str, student_response: str) -> None:
@@ -53,7 +53,7 @@ def submit_response(question_id: int, student_name: str, student_response: str) 
     else:
         conn.execute("INSERT INTO responses (question_id, student_name, response_text) VALUES (?, ?, ?)",
                      (question_id, student_name, student_response))
-    st.experimental_rerun()
+    st.rerun()
 
 
 def display_teacher_page() -> None:
@@ -73,7 +73,7 @@ def display_teacher_page() -> None:
         # Display all responses to the current question
         st.header("All Responses")
         if st.button("Check for Responses"):
-            st.experimental_rerun()
+            st.rerun()
         responses = conn.execute("SELECT student_name, response_text FROM responses WHERE question_id = ?",
                                  (current_question[0],)).fetchall()
         for response in responses:
@@ -114,7 +114,7 @@ def display_student_page() -> None:
                         st.error("Please enter your response")
 
         if st.button("Check for Next Question"):
-            st.experimental_rerun()
+            st.rerun()
     else:
         st.write("No question available")
 
@@ -140,7 +140,7 @@ def display_login_page() -> None:
     if st.button("Login"):
         if username == TEACHER_USERNAME and password == TEACHER_PASSWORD:
             st.session_state['logged_in'] = True
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Invalid username or password")
 
@@ -178,4 +178,4 @@ elif selected == "Archive" and st.session_state.get('logged_in', False):
 
 elif selected == "Logout":
     st.session_state['logged_in'] = False
-    st.experimental_rerun()
+    st.rerun()
