@@ -2,30 +2,35 @@ import duckdb
 import streamlit as st
 from streamlit_option_menu import option_menu
 from typing import Optional
+import os.path
 
-# Set up the DuckDB database
-conn = duckdb.connect('responses.db')
 
-# Create sequence for primary keys
-conn.execute("CREATE SEQUENCE IF NOT EXISTS seq_question START 1")
-conn.execute("CREATE SEQUENCE IF NOT EXISTS seq_response START 1")
+# Set up the DuckDB database if it doesn't exist. Otherwise just connect
+if os.path.isfile('responses.db'):
+    conn = duckdb.connect('responses.db')
+else:
+    conn = duckdb.connect('responses.db')
 
-# Create tables for questions and responses
-conn.execute("""
-CREATE TABLE IF NOT EXISTS questions (
-    id INTEGER PRIMARY KEY DEFAULT NEXTVAL('seq_question'),
-    question_text TEXT
-)
-""")
-conn.execute("""
-CREATE TABLE IF NOT EXISTS responses (
-    id INTEGER PRIMARY KEY DEFAULT NEXTVAL('seq_response'),
-    question_id INTEGER,
-    student_name TEXT,
-    response_text TEXT,
-    FOREIGN KEY (question_id) REFERENCES questions (id)
-)
-""")
+    # Create sequence for primary keys
+    conn.execute("CREATE SEQUENCE IF NOT EXISTS seq_question START 1")
+    conn.execute("CREATE SEQUENCE IF NOT EXISTS seq_response START 1")
+
+    # Create tables for questions and responses
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS questions (
+        id INTEGER PRIMARY KEY DEFAULT NEXTVAL('seq_question'),
+        question_text TEXT
+    )
+    """)
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS responses (
+        id INTEGER PRIMARY KEY DEFAULT NEXTVAL('seq_response'),
+        question_id INTEGER,
+        student_name TEXT,
+        response_text TEXT,
+        FOREIGN KEY (question_id) REFERENCES questions (id)
+    )
+    """)
 
 # Authentication
 TEACHER_USERNAME = st.secrets['LOGIN']
