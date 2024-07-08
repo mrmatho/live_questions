@@ -56,9 +56,11 @@ def submit_response(question_id: int, student_name: str, student_response: str) 
     if existing_response:
         conn.execute("UPDATE responses SET response_text = ? WHERE id = ?",
                      (student_response, existing_response[0]))
+        st.toast("✨ Response Updated ✨")
     else:
         conn.execute("INSERT INTO responses (question_id, student_name, response_text) VALUES (?, ?, ?)",
                      (question_id, student_name, student_response))
+        st.toast("✨ Response Submitted ✨")
     st.rerun()
 
 
@@ -102,10 +104,10 @@ def display_student_page() -> None:
     if current_question:
         st.header("Current Question")
         
-        student_name = st.text_input("Enter your name")
         with st.chat_message("user", avatar="❓"):
             st.write("The current question is:")
             st.subheader(current_question[1], anchor=False)
+        student_name = st.text_input("Enter your name")
         existing_response = ''
         if student_name:    
             # Check if the student has already submitted a response
