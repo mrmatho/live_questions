@@ -5,6 +5,12 @@ from streamlit_option_menu import option_menu
 import os.path
 
 st.logo('images/liveq_logo.png')
+st.set_page_config(
+    page_title="Matho's Live Questions",
+    page_icon="❓",
+    layout="wide"
+)
+
 # Set up the DuckDB database if it doesn't exist. Otherwise just connect
 if os.path.isfile('responses.db'):
     # this needs to be inside the if, otherwise it will create the file and never realise the db is empty
@@ -148,7 +154,7 @@ def display_login_page() -> None:
         else:
             st.error("Invalid username or password")
 
-
+# Page 
 # Navigation menu
 with st.sidebar:
     if st.session_state.get('logged_in', False):
