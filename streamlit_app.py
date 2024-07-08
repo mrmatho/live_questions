@@ -65,28 +65,33 @@ def submit_response(question_id: int, student_name: str, student_response: str) 
 def display_teacher_page() -> None:
     """Display the teacher page where the teacher can submit questions and view responses."""
     st.title("Question Dashboard")
-    new_question = st.text_input("Enter a new question:")
-    if st.button("Submit Question"):
-        submit_question(new_question)
 
+    col1, col2 = st.columns(2)
+    with col2:
+        st.subheader("Ask another question")
+        new_question = st.text_input("Enter a new question:")
+        if st.button("Submit Question"):
+            submit_question(new_question)
+
+    with col1:
     # Display current question
-    st.subheader("Current Question")
-    current_question = conn.execute("SELECT id, question_text FROM questions ORDER BY id DESC LIMIT 1").fetchone()
-    if current_question:
-        with st.chat_message("user"):
-            st.write(current_question[1])
+        st.subheader("Current Question")
+        current_question = conn.execute("SELECT id, question_text FROM questions ORDER BY id DESC LIMIT 1").fetchone()
+        if current_question:
+            with st.chat_message("user"):
+                st.write(current_question[1])
 
-        # Display all responses to the current question
-        st.header("All Responses")
-        if st.button("Check for Responses"):
-            st.rerun()
-        responses = conn.execute("SELECT student_name, response_text FROM responses WHERE question_id = ?",
-                                 (current_question[0],)).fetchall()
-        for response in responses:
-            with st.chat_message(response[0]):
-                st.write(f"**{response[0]}**: {response[1]}")
-    else:
-        st.write("No question available")
+            # Display all responses to the current question
+            st.header("All Responses")
+            if st.button("Check for Responses"):
+                st.rerun()
+            responses = conn.execute("SELECT student_name, response_text FROM responses WHERE question_id = ?",
+                                    (current_question[0],)).fetchall()
+            for response in responses:
+                with st.chat_message(response[0]):
+                    st.write(f"**{response[0]}**: {response[1]}")
+        else:
+            st.write("No question available")
 
 
 def display_student_page() -> None:
