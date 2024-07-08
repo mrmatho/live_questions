@@ -1,7 +1,7 @@
 import duckdb
 import streamlit as st
 from streamlit_option_menu import option_menu
-from typing import Optional
+
 import os.path
 
 st.logo('images/liveq_logo.png')
@@ -58,13 +58,13 @@ def submit_response(question_id: int, student_name: str, student_response: str) 
 
 def display_teacher_page() -> None:
     """Display the teacher page where the teacher can submit questions and view responses."""
-    st.title("Teacher Page")
+    st.title("Question Dashboard")
     new_question = st.text_input("Enter a new question:")
     if st.button("Submit Question"):
         submit_question(new_question)
 
     # Display current question
-    st.header("Current Question")
+    st.subheader("Current Question")
     current_question = conn.execute("SELECT id, question_text FROM questions ORDER BY id DESC LIMIT 1").fetchone()
     if current_question:
         with st.chat_message("user"):
@@ -85,7 +85,7 @@ def display_teacher_page() -> None:
 
 def display_student_page() -> None:
     """Display the student page where students can submit and edit their responses."""
-    st.title("Student Page")
+    st.title("Matho's Live Question Page")
     current_question = conn.execute("SELECT id, question_text FROM questions ORDER BY id DESC LIMIT 1").fetchone()
 
     if current_question:
