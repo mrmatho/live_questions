@@ -104,8 +104,8 @@ def display_student_page() -> None:
         
         student_name = st.text_input("Enter your name")
         with st.chat_message("user", avatar="❓"):
-            st.write("Your question is:")
-            st.subheader(current_question[1])
+            st.write("The current question is:")
+            st.subheader(current_question[1], anchor=False)
         existing_response = ''
         if student_name:    
             # Check if the student has already submitted a response
