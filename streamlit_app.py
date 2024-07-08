@@ -61,7 +61,7 @@ def submit_response(question_id: int, student_name: str, student_response: str) 
         conn.execute("INSERT INTO responses (question_id, student_name, response_text) VALUES (?, ?, ?)",
                      (question_id, student_name, student_response))
         st.toast("✨ Response Submitted ✨")
-    st.rerun()
+        st.balloons()
 
 
 def display_teacher_page() -> None:
@@ -69,11 +69,7 @@ def display_teacher_page() -> None:
     st.title("Question Dashboard")
 
     col1, col2 = st.columns(2)
-    with col2:
-        st.subheader("Ask another question")
-        new_question = st.text_input("Enter a new question:")
-        if st.button("Submit Question"):
-            submit_question(new_question)
+    
 
     with col1:
     # Display current question
@@ -94,7 +90,23 @@ def display_teacher_page() -> None:
                     st.write(f"**{response[0]}**: {response[1]}")
         else:
             st.write("No question available")
+    
+    with col2:
+        st.subheader("Ask another question")
+        subcol_a, subcol_b = st.columns([0.7, 0.3], vertical_alignment="top")
+        new_question = subcol_a.text_area("**Enter a new question:**")
+        expected_num = subcol_b.number_input("Expected responses", min_value=1, value=10)
+        if st.button("Submit Question"):
+            submit_question(new_question)
+        
+        if current_question:
+            subcol_c, subcol_d = st.columns(2)
+            subcol_c.metric("Responses Received", len(responses))
+            subcol_d.metric("Expected Responses", expected_num)
+            st.progress(int(len(responses)/expected_num * 100))
 
+
+        
 
 def display_student_page() -> None:
     """Display the student page where students can submit and edit their responses."""
