@@ -1,7 +1,7 @@
 import duckdb
 import streamlit as st
 from streamlit_option_menu import option_menu
-
+from PIL import Image, ImageDraw, ImageFont
 import os.path
 
 st.logo('images/liveq_logo.png')
@@ -63,6 +63,32 @@ def submit_response(question_id: int, student_name: str, student_response: str) 
         st.toast("✨ Response Submitted ✨")
         st.balloons()
 
+#@st.experimental_dialog("User Shared")
+def create_shareable_image(response: list[str]) -> None:
+    """Create an image from a given response - for display to the class"""
+    width, height = 1000, 500
+    text = f"{response[0]}: \n\n{response[1]}"
+
+    image = Image.new('RGB', (width, height), color='black')
+    draw = ImageDraw.Draw(image)
+    font_size = 40
+    # Load a font - using the fallback if it doesn't work
+    try:
+        font = ImageFont.truetype("fonts/Montserrat-Light.ttf", font_size)
+    except IOError:
+        font = ImageFont.load_default()
+    
+    # Calculate text size and position
+    left, top, right, bottom = font.getbbox(text)
+    text_width = right - left
+    text_height = bottom - top
+    position = ((width - text_width) / 2, (height - text_height) / 2)
+    
+    # Draw the text on the image
+    draw.text(position, text, fill='white', font=font)
+    
+    # Now we have an image
+    st.image(image)
 
 def display_teacher_page() -> None:
     """Display the teacher page where the teacher can submit questions and view responses."""
@@ -88,6 +114,8 @@ def display_teacher_page() -> None:
             for response in responses:
                 with st.chat_message(response[0]):
                     st.write(f"**{response[0]}**: {response[1]}")
+                    if st.button("Share image", key=response[0]):
+                        create_shareable_image(response)
         else:
             st.write("No question available")
     
@@ -209,3 +237,7 @@ elif selected == "Archive" and st.session_state.get('logged_in', False):
 elif selected == "Logout":
     st.session_state['logged_in'] = False
     st.rerun()
+
+
+
+    
