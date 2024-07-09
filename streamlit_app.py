@@ -4,7 +4,6 @@ from streamlit_option_menu import option_menu
 
 import os.path
 
-st.logo('images/liveq_logo.png')
 st.set_page_config(
     page_title="Matho's Live Questions",
     page_icon="❓",
