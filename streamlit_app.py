@@ -8,7 +8,8 @@ st.logo('images/liveq_logo.png')
 st.set_page_config(
     page_title="Matho's Live Questions",
     page_icon="❓",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # Set up the DuckDB database if it doesn't exist. Otherwise just connect
@@ -67,14 +68,15 @@ def submit_response(question_id: int, student_name: str, student_response: str) 
 def create_shareable_image(response: list[str]) -> None:
     """Create an image from a given response - for display to the class"""
     width, height = 1000, 500
-    text = f"{response[0]}: \n\n{response[1]}"
+    text = f"{response[0]}: \n{response[1]}"
 
     image = Image.new('RGB', (width, height), color='black')
     draw = ImageDraw.Draw(image)
-    font_size = 40
+    font_size = 30
     # Load a font - using the fallback if it doesn't work
     try:
         font = ImageFont.truetype("fonts/Montserrat-Light.ttf", font_size)
+        name_font = ImageFont.truetype("fonts/Montserrat-SemiBold.ttf", font_size)
     except IOError:
         font = ImageFont.load_default()
     
@@ -83,6 +85,13 @@ def create_shareable_image(response: list[str]) -> None:
     text_width = right - left
     text_height = bottom - top
     position = ((width - text_width) / 2, (height - text_height) / 2)
+    if text_width > width:
+        font.size = font.size - 10
+        left, top, right, bottom = font.getbbox(text)
+        text_width = right - left
+        text_height = bottom - top
+        position = (20, (height - text_height) / 2)
+    
     
     # Draw the text on the image
     draw.text(position, text, fill='white', font=font)
