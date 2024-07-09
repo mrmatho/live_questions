@@ -103,7 +103,11 @@ def display_teacher_page() -> None:
             subcol_c, subcol_d = st.columns(2)
             subcol_c.metric("Responses Received", len(responses))
             subcol_d.metric("Expected Responses", expected_num)
-            st.progress(int(len(responses)/expected_num * 100))
+            # Checking for error with more responses than expected
+            if len(responses) <= expected_num:
+                st.progress(int(len(responses)/expected_num * 100), "Response Progress")
+            else:
+                st.progress(100, "Response Progress")
 
 
         
