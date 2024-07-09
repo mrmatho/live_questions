@@ -68,7 +68,7 @@ def display_teacher_page() -> None:
     """Display the teacher page where the teacher can submit questions and view responses."""
     st.title("Question Dashboard")
 
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([0.6, 0.4])
     
 
     with col1:
@@ -93,9 +93,8 @@ def display_teacher_page() -> None:
     
     with col2:
         st.subheader("Ask another question")
-        subcol_a, subcol_b = st.columns([0.7, 0.3], vertical_alignment="top")
-        new_question = subcol_a.text_area("**Enter a new question:**")
-        expected_num = subcol_b.number_input("Expected responses", min_value=1, value=10)
+        new_question = st.text_area("**Enter a new question:**")
+        expected_num = st.number_input("Expected responses", min_value=1, value=10)
         if st.button("Submit Question"):
             submit_question(new_question)
         
