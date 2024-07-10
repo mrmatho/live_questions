@@ -50,17 +50,20 @@ def submit_question(new_question: str) -> None:
 
 def submit_response(question_id: int, student_name: str, student_response: str) -> None:
     """Submit or update a student response in the database."""
+    st.session_state['name'] = student_name
     existing_response = conn.execute("SELECT id FROM responses WHERE question_id = ? AND student_name = ?",
                                      (question_id, student_name)).fetchone()
     if existing_response:
         conn.execute("UPDATE responses SET response_text = ? WHERE id = ?",
                      (student_response, existing_response[0]))
         st.toast("✨ Response Updated ✨")
+        st.balloons
     else:
         conn.execute("INSERT INTO responses (question_id, student_name, response_text) VALUES (?, ?, ?)",
                      (question_id, student_name, student_response))
         st.toast("✨ Response Submitted ✨")
         st.balloons()
+    st.rerun()
 
 
 def display_teacher_page() -> None:
@@ -121,7 +124,7 @@ def display_student_page() -> None:
         with st.chat_message("user", avatar="❓"):
             st.write("The current question is:")
             st.subheader(current_question[1], anchor=False)
-        student_name = st.text_input("Enter your name")
+        student_name = st.text_input("Enter your name", value = st.session_state.get('name',''))
         existing_response = ''
         if student_name:    
             # Check if the student has already submitted a response
@@ -181,9 +184,9 @@ with st.sidebar:
     if st.session_state.get('logged_in', False):
         selected = option_menu(
             menu_title="Live Questions",
-            options=["Teacher", "Archive", "Logout"],
-            icons=["person", "archive", "box-arrow-right"],
-            menu_icon="cast",
+            options=["Teacher", "Archive", "Student" "Logout"],
+            icons=["person", "archive", "people", "box-arrow-right"],
+            menu_icon="patch-question",
             default_index=0,
             
         )
@@ -192,7 +195,7 @@ with st.sidebar:
             menu_title="Live Questions",
             options=["Student", "Teacher"],
             icons=["people", "person"],
-            menu_icon="cast",
+            menu_icon="patch-question",
             default_index=0,
         )
 
