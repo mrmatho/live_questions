@@ -7,7 +7,8 @@ import os.path
 st.set_page_config(
     page_title="Matho's Live Questions",
     page_icon="❓",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # Set up the DuckDB database if it doesn't exist. Otherwise just connect
