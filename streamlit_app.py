@@ -42,7 +42,6 @@ else:
 TEACHER_USERNAME = st.secrets['LOGIN']
 TEACHER_PASSWORD = st.secrets['PASSWORD']
 
-
 def submit_question(new_question: str) -> None:
     """Submit a new question to the database."""
     conn.execute("INSERT INTO questions (question_text) VALUES (?)", (new_question,))
@@ -50,7 +49,8 @@ def submit_question(new_question: str) -> None:
 
 
 def submit_response(question_id: int, student_name: str, student_response: str) -> None:
-    """Submit or update a student response in the database."""
+    """Submit or update a student response in the database.
+    """
     st.session_state['name'] = student_name
     existing_response = conn.execute("SELECT id FROM responses WHERE question_id = ? AND student_name = ?",
                                      (question_id, student_name)).fetchone()
@@ -71,7 +71,7 @@ def display_teacher_page() -> None:
     """Display the teacher page where the teacher can submit questions and view responses."""
     st.title("Question Dashboard")
 
-    col1, col2 = st.columns([0.6, 0.4])
+    col1, col2 = st.columns([0.65, 0.35])
     
 
     with col1:
@@ -158,6 +158,7 @@ def display_archive_page() -> None:
     """Display the archive page where the teacher can view old questions and responses."""
     st.title("Archive")
     questions = conn.execute("SELECT id, question_text FROM questions ORDER BY id DESC").fetchall()
+    # Loop through questions adding a header for each question, and then displaying its responses
     for question in questions:
         st.header(f"Question: {question[1]}")
         responses = conn.execute("SELECT student_name, response_text FROM responses WHERE question_id = ?",
@@ -200,6 +201,7 @@ with st.sidebar:
             default_index=0,
         )
 
+# Display the appropriate page based on the selected option
 if selected == "Teacher":
     if not st.session_state.get('logged_in', False):
         display_login_page()
